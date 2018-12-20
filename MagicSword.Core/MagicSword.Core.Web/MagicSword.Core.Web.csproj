@@ -65,6 +65,7 @@
     <None Remove="ClientApp\src\app\game\logic\IActor.ts" />
     <None Remove="ClientApp\src\app\game\logic\World.ts" />
     <None Remove="ClientApp\src\app\game\Message.ts" />
+    <None Remove="ClientApp\src\app\game\ObjectMover.ts" />
     <None Remove="ClientApp\src\app\game\ResourceManager.ts" />
     <None Remove="ClientApp\src\app\game\Skybox.ts" />
     <None Remove="ClientApp\src\app\game\SocketService.ts" />
@@ -99,6 +100,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\game\local\ClientGameService.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\game\local\EventBusResponseProcessor.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\game\Message.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\game\ObjectMover.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\game\ResourceManager.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\game\events\handlers\DrawCardClientEventHandler.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\SocketClient.ts" />

@@ -11,6 +11,7 @@ import "three/examples/js/loaders/GLTFLoader";
 import { DiceManager, DiceD6 } from "@App/modules/threejs-dice";
 
 import { Skybox } from "@App/game/Skybox";
+import { ObjectMover } from "@App/game/ObjectMover";
 import { World } from "@App/game/logic/World";
 import { IActor } from "@App/game/logic/IActor";
 import { Collections } from "@Common/utils/Collections";
@@ -58,6 +59,8 @@ export class Game {
 
     eventDispatcher: ClientEventDispatcher;
 
+    objectMover: ObjectMover;
+
     constructor(vieport: any, public services: Services) {
 
         this.container = vieport;
@@ -87,6 +90,8 @@ export class Game {
         this.container.addEventListener("mousedown", this.onDocumentMouseDown, false);
         this.container.addEventListener("mousemove", this.onDocumentMouseMove, false);
         this.container.addEventListener("mouseup", this.onDocumentMouseUp, false);
+
+        //this.objectMover = new ObjectMover(this.container);
 
         this.threeXWindowResize(this.renderer, this.camera);
 
