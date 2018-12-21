@@ -127,11 +127,15 @@ export class ObjectMover {
 
         switch (event.touches.length) {
             case 1: // one-fingered touch: rotate
-                if (this.state !== STATE.TOUCH_ROTATE) return; // is this needed?
+                if (this.state !== STATE.TOUCH_ROTATE) {
+                    return; // is this needed?
+                }
                 this.handleTouchMoveRotate(event);
                 break;
             case 2: // two-fingered touch: dolly-pan
-                if (this.state !== STATE.TOUCH_DOLLY_PAN) return; // is this needed?
+                if (this.state !== STATE.TOUCH_DOLLY_PAN) {
+                    return; // is this needed?
+                }
                 this.handleTouchMoveDollyPan(event);
                 break;
             default:
@@ -159,13 +163,7 @@ export class ObjectMover {
     }
 
     handleMouseMoveRotate = (event: MouseEvent) => {
-        this.rotateEnd.set(event.clientX, event.clientY);
-        this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart).multiplyScalar(this.rotateSpeed);
-        var element = this.container; // scope.domElement === document ? scope.domElement.body : scope.domElement;
-        this.rotateLeft(2 * Math.PI * this.rotateDelta.x / element.clientHeight); // yes, height
-        this.rotateUp(2 * Math.PI * this.rotateDelta.y / element.clientHeight);
-        this.rotateStart.copy(this.rotateEnd);
-        //scope.update();
+        this.handleRotateCommon(event.clientX, event.clientY);
     }
 
     handleMouseMoveDolly = (event: MouseEvent) => {
@@ -181,11 +179,7 @@ export class ObjectMover {
     }
 
     handleMouseMovePan = (event: MouseEvent) => {
-        this.panEnd.set(event.clientX, event.clientY);
-        this.panDelta.subVectors(this.panEnd, this.panStart).multiplyScalar(this.panSpeed);
-        this.pan(this.panDelta.x, this.panDelta.y);
-        this.panStart.copy(this.panEnd);
-        //scope.update();
+        this.handlePanCommon(event.clientX, event.clientY);
     }
 
     handleMouseUp = (event: MouseEvent) => {
@@ -193,11 +187,11 @@ export class ObjectMover {
 
     //touch event handlers
 
-    handleTouchStartRotate = (event) => {
+    handleTouchStartRotate = (event: TouchEvent) => {
         this.rotateStart.set(event.touches[0].pageX, event.touches[0].pageY);
     }
 
-    handleTouchStartDollyPan = (event)=> {
+    handleTouchStartDollyPan = (event: TouchEvent)=> {
         //if (scope.enableZoom) {
         //    var dx = event.touches[0].pageX - event.touches[1].pageX;
         //    var dy = event.touches[0].pageY - event.touches[1].pageY;
@@ -212,17 +206,11 @@ export class ObjectMover {
         //}
     }
 
-    handleTouchMoveRotate = (event) => {
-        this.rotateEnd.set(event.touches[0].pageX, event.touches[0].pageY);
-        this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart).multiplyScalar(this.rotateSpeed);
-        var element = this.container; // scope.domElement === document ? scope.domElement.body : scope.domElement;
-        this.rotateLeft(2 * Math.PI * this.rotateDelta.x / element.clientHeight); // yes, height
-        this.rotateUp(2 * Math.PI * this.rotateDelta.y / element.clientHeight);
-        this.rotateStart.copy(this.rotateEnd);
-        //scope.update();
+    handleTouchMoveRotate = (event: TouchEvent) => {
+        this.handleRotateCommon(event.touches[0].pageX, event.touches[0].pageY);
     }
 
-    handleTouchMoveDollyPan = (event) => {
+    handleTouchMoveDollyPan = (event: TouchEvent) => {
         //if (scope.enableZoom) {
         //    var dx = event.touches[0].pageX - event.touches[1].pageX;
         //    var dy = event.touches[0].pageY - event.touches[1].pageY;
@@ -236,16 +224,29 @@ export class ObjectMover {
         //if (scope.enablePan) {
         var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
         var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
+        this.handlePanCommon(x,y);
+        //}
+    }
+
+    handleRotateCommon = (x: number, y: number) => {
+        this.rotateEnd.set(x, y);
+        this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart).multiplyScalar(this.rotateSpeed);
+        var element = this.container; // scope.domElement === document ? scope.domElement.body : scope.domElement;
+        this.rotateLeft(2 * Math.PI * this.rotateDelta.x / element.clientHeight); // yes, height
+        this.rotateUp(2 * Math.PI * this.rotateDelta.y / element.clientHeight);
+        this.rotateStart.copy(this.rotateEnd);
+        //scope.update();
+    }
+
+    handlePanCommon = (x: number, y: number) => {
         this.panEnd.set(x, y);
         this.panDelta.subVectors(this.panEnd, this.panStart).multiplyScalar(this.panSpeed);
         this.pan(this.panDelta.x, this.panDelta.y);
         this.panStart.copy(this.panEnd);
-        //}
-
         //scope.update();
     }
 
-    handleTouchEnd = (event) => {
+    handleTouchEnd = (event: TouchEvent) => {
     }
 
     pan = (x, y) => {
