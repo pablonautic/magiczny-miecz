@@ -22,11 +22,6 @@ export class ObjectMover {
     private panEnd = new THREE.Vector2();
     private panDelta = new THREE.Vector2();
 
-    private dollyStart = new THREE.Vector2();
-    private dollyEnd = new THREE.Vector2();
-    private dollyDelta = new THREE.Vector2();
-
-    private zoomSpeed = 1.0;
     private rotateSpeed = 1.0;
     private panSpeed = 1.0;
 
@@ -46,14 +41,17 @@ export class ObjectMover {
     private onMouseDown = (event: MouseEvent) => {
         event.preventDefault();
 
+        var x = event.clientX;
+        var y = event.clientY;
+
         switch (event.button) {
             case this.mouseButtons.LEFT:
-                this.handleMouseDownRotate(event);
                 this.state = STATE.ROTATE;
+                this.handleRotateStart(x, y);
                 break;
             case this.mouseButtons.RIGHT:
-                this.handleMouseDownPan(event);
                 this.state = STATE.PAN;
+                this.handlePanStart(x, y);
                 break;
         }
 
@@ -69,21 +67,23 @@ export class ObjectMover {
 
         switch (this.state) {
             case STATE.ROTATE:
-                this.handleMouseMoveRotate(event);
+                this.handleRotateMove(event.clientX, event.clientY);
                 break;
             case STATE.PAN:
-                this.handleMouseMovePan(event);
+                this.handlePanMove(event.clientX, event.clientY);
                 break;
         }
     }
 
     private onMouseUp = (event: MouseEvent) => {
-        this.handleMouseUp(event);
+
+        this.state = STATE.NONE;
 
         this.container.removeEventListener('mousemove', this.onMouseMove, false);
         this.container.removeEventListener('mouseup', this.onMouseUp, false);
+
+        this.handleEnd();
         //scope.dispatchEvent(endEvent);
-        this.state = STATE.NONE;
     }
 
     private touchToState = (event: TouchEvent) => {
@@ -91,7 +91,6 @@ export class ObjectMover {
             case 1:
                 return STATE.TOUCH_DOLLY_PAN;
             case 2:
-                this.handleTouchStartDollyPan(event);
                 return STATE.TOUCH_ROTATE;
             default:
                 return STATE.NONE;
@@ -104,10 +103,14 @@ export class ObjectMover {
         this.state = this.touchToState(event);
         switch (this.state) {
             case STATE.TOUCH_ROTATE:
-                this.handleTouchStartRotate(event);
+                var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
+                var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
+                this.handleRotateStart(x, y);
                 break;
             case STATE.TOUCH_DOLLY_PAN:
-                this.handleTouchStartDollyPan(event);
+                var x = event.touches[0].pageX;
+                var y = event.touches[0].pageY;
+                this.handlePanStart(x, y);
                 break;
             default:
                 break;
@@ -119,7 +122,6 @@ export class ObjectMover {
     }
 
     private onTouchMove = (event: TouchEvent) => {
-
         event.preventDefault();
         event.stopPropagation();
 
@@ -127,10 +129,14 @@ export class ObjectMover {
 
         switch (localState) {
             case STATE.TOUCH_ROTATE:
-                this.handleTouchMoveRotate(event);
+                var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
+                var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
+                this.handleRotateMove(x, y);
                 break;
             case STATE.TOUCH_DOLLY_PAN:
-                this.handleTouchMoveDollyPan(event);
+                var x = event.touches[0].pageX;
+                var y = event.touches[0].pageY;
+                this.handlePanMove(x, y);
                 break;
             default:
                 this.state = STATE.NONE;
@@ -139,70 +145,22 @@ export class ObjectMover {
     }
 
     private onTouchEnd = (event: TouchEvent) => {
-        this.handleTouchEnd(event);
+        this.handleEnd();
         this.state = STATE.NONE;
     }
 
-    //mouse event handlers
-
-    handleMouseDownRotate = (event: MouseEvent) => {
-        this.rotateStart.set(event.clientX, event.clientY);
+    handleEnd = () => {
     }
 
-    handleMouseDownDolly = (event: MouseEvent) => {
-        this.dollyStart.set(event.clientX, event.clientY);
-    }
-
-    handleMouseDownPan = (event: MouseEvent) => {
-        this.panStart.set(event.clientX, event.clientY);
-    }
-
-    handleMouseMoveRotate = (event: MouseEvent) => {
-        this.handleRotateCommon(event.clientX, event.clientY);
-    }
-
-    handleMouseMoveDolly = (event: MouseEvent) => {
-        this.dollyEnd.set(event.clientX, event.clientY);
-        this.dollyDelta.subVectors(this.dollyEnd, this.dollyStart);
-        if (this.dollyDelta.y > 0) {
-            //dollyIn(getZoomScale());
-        } else if (this.dollyDelta.y < 0) {
-            //dollyOut(getZoomScale());
-        }
-        this.dollyStart.copy(this.dollyEnd);
-        //scope.update();
-    }
-
-    handleMouseMovePan = (event: MouseEvent) => {
-        this.handlePanCommon(event.clientX, event.clientY);
-    }
-
-    handleMouseUp = (event: MouseEvent) => {
-    }
-
-    //touch event handlers
-
-    handleTouchStartRotate = (event: TouchEvent) => {
-        this.rotateStart.set(event.touches[0].pageX, event.touches[0].pageY);
-    }
-
-    handleTouchStartDollyPan = (event: TouchEvent) => {
-        var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
-        var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
+    handlePanStart(x: number, y: number) {
         this.panStart.set(x, y);
     }
 
-    handleTouchMoveRotate = (event: TouchEvent) => {
-        this.handleRotateCommon(event.touches[0].pageX, event.touches[0].pageY);
+    handleRotateStart(x: number, y: number) {
+        this.rotateStart.set(x, y);
     }
 
-    handleTouchMoveDollyPan = (event: TouchEvent) => {
-        var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
-        var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
-        this.handlePanCommon(x, y);
-    }
-
-    handleRotateCommon = (x: number, y: number) => {
+    handleRotateMove = (x: number, y: number) => {
         this.rotateEnd.set(x, y);
         this.rotateDelta.subVectors(this.rotateEnd, this.rotateStart).multiplyScalar(this.rotateSpeed);
         var element = this.container; // scope.domElement === document ? scope.domElement.body : scope.domElement;
@@ -212,15 +170,12 @@ export class ObjectMover {
         //scope.update();
     }
 
-    handlePanCommon = (x: number, y: number) => {
+    handlePanMove = (x: number, y: number) => {
         this.panEnd.set(x, y);
         this.panDelta.subVectors(this.panEnd, this.panStart).multiplyScalar(this.panSpeed);
         this.pan(this.panDelta.x, this.panDelta.y);
         this.panStart.copy(this.panEnd);
         //scope.update();
-    }
-
-    handleTouchEnd = (event: TouchEvent) => {
     }
 
     pan = (x, y) => {
