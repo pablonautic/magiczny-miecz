@@ -80,14 +80,14 @@ export class ObjectMover {
 
         this.game.raycaster.set(this.game.camera.position, vector.sub(this.game.camera.position).normalize());
 
-        //this.raycaster.setFromCamera({ x: event.clientX,  y: event.clientY }, this.camera);
+        //this.game.raycaster.setFromCamera({ x: mouseX, y: mouseY }, this.game.camera);
     }
 
     private onMouseDown = (event: MouseEvent) => {
         event.preventDefault();
 
-        var x = event.offsetX;
-        var y = event.offsetY;
+        var x = event.clientX - (event.target as any).offsetParent.offsetLeft;
+        var y = event.clientY - (event.target as any).offsetParent.offsetTop;
 
         console.log(event);
         console.log(x + " " + y);
@@ -113,8 +113,8 @@ export class ObjectMover {
     private onMouseMove = (event: MouseEvent) => {
         event.preventDefault();
 
-        var x = event.offsetX;
-        var y = event.offsetY;
+        var x = event.clientX - (event.target as any).offsetParent.offsetLeft;
+        var y = event.clientY - (event.target as any).offsetParent.offsetTop;
 
         switch (this.state) {
             case STATE.ROTATE:
@@ -131,8 +131,8 @@ export class ObjectMover {
         this.container.removeEventListener('mousemove', this.onMouseMove, false);
         this.container.removeEventListener('mouseup', this.onMouseUp, false);
 
-        var x = event.offsetX;
-        var y = event.offsetY;
+        var x = event.clientX - (event.target as any).offsetParent.offsetLeft;
+        var y = event.clientY - (event.target as any).offsetParent.offsetTop;
 
         switch (this.state) {
             case STATE.ROTATE:
@@ -177,8 +177,8 @@ export class ObjectMover {
                 var y = event.touches[0].pageY;
 
 
-                x = event.touches[0].pageX - (event.touches[0].target as any).offsetLeft;
-                y = event.touches[0].pageY - (event.touches[0].target as any).offsetTop;
+                x = event.touches[0].clientX - (event.target as any).offsetParent.offsetLeft;
+                y = event.touches[0].clientY - (event.target as any).offsetParent.offsetTop;
 
                 console.log(x + " " + y);
 
@@ -209,8 +209,8 @@ export class ObjectMover {
                 var x = event.touches[0].pageX;
                 var y = event.touches[0].pageY;
 
-                x = event.touches[0].pageX - (event.touches[0].target as any).offsetLeft;
-                y = event.touches[0].pageY - (event.touches[0].target as any).offsetTop;
+                x = event.touches[0].clientX - (event.target as any).offsetParent.offsetLeft;
+                y = event.touches[0].clientY - (event.target as any).offsetParent.offsetTop;
 
                 this.handlePanMove(x, y);
                 break;
