@@ -3,7 +3,6 @@ import * as THREE from "three";
 export enum STATE {
     NONE = -1,
     ROTATE = 0,
-    DOLLY = 1,
     PAN = 2,
     TOUCH_ROTATE = 3,
     TOUCH_DOLLY_PAN = 4
@@ -49,17 +48,8 @@ export class ObjectMover {
 
         switch (event.button) {
             case this.mouseButtons.LEFT:
-                if (event.ctrlKey || event.metaKey || event.shiftKey) {
-                    this.handleMouseDownPan(event);
-                    this.state = STATE.PAN;
-                } else {
-                    this.handleMouseDownRotate(event);
-                    this.state = STATE.ROTATE;
-                }
-                break;
-            case this.mouseButtons.MIDDLE:
-                this.handleMouseDownDolly(event);
-                this.state = STATE.DOLLY;
+                this.handleMouseDownRotate(event);
+                this.state = STATE.ROTATE;
                 break;
             case this.mouseButtons.RIGHT:
                 this.handleMouseDownPan(event);
@@ -81,9 +71,6 @@ export class ObjectMover {
             case STATE.ROTATE:
                 this.handleMouseMoveRotate(event);
                 break;
-            case STATE.DOLLY:
-                this.handleMouseMoveDolly(event);
-                break;
             case STATE.PAN:
                 this.handleMouseMovePan(event);
                 break;
@@ -99,20 +86,31 @@ export class ObjectMover {
         this.state = STATE.NONE;
     }
 
+    private touchToState = (event: TouchEvent) => {
+        switch (event.touches.length) {
+            case 1:
+                return STATE.TOUCH_DOLLY_PAN;
+            case 2:
+                this.handleTouchStartDollyPan(event);
+                return STATE.TOUCH_ROTATE;
+            default:
+                return STATE.NONE;
+        }
+    }
+
     private onTouchStart = (event: TouchEvent) => {
         event.preventDefault();
 
-        switch (event.touches.length) {
-            case 1:	// one-fingered touch: rotate
+        this.state = this.touchToState(event);
+        switch (this.state) {
+            case STATE.TOUCH_ROTATE:
                 this.handleTouchStartRotate(event);
-                this.state = STATE.TOUCH_ROTATE;
                 break;
-            case 2:	// two-fingered touch: dolly-pan
+            case STATE.TOUCH_DOLLY_PAN:
                 this.handleTouchStartDollyPan(event);
-                this.state = STATE.TOUCH_DOLLY_PAN;
                 break;
             default:
-                this.state = STATE.NONE;
+                break;
         }
 
         if (this.state !== STATE.NONE) {
@@ -125,21 +123,18 @@ export class ObjectMover {
         event.preventDefault();
         event.stopPropagation();
 
-        switch (event.touches.length) {
-            case 1: // one-fingered touch: rotate
-                if (this.state !== STATE.TOUCH_ROTATE) {
-                    return; // is this needed?
-                }
+        var localState = this.touchToState(event);
+
+        switch (localState) {
+            case STATE.TOUCH_ROTATE:
                 this.handleTouchMoveRotate(event);
                 break;
-            case 2: // two-fingered touch: dolly-pan
-                if (this.state !== STATE.TOUCH_DOLLY_PAN) {
-                    return; // is this needed?
-                }
+            case STATE.TOUCH_DOLLY_PAN:
                 this.handleTouchMoveDollyPan(event);
                 break;
             default:
                 this.state = STATE.NONE;
+                break;
         }
     }
 
@@ -191,19 +186,10 @@ export class ObjectMover {
         this.rotateStart.set(event.touches[0].pageX, event.touches[0].pageY);
     }
 
-    handleTouchStartDollyPan = (event: TouchEvent)=> {
-        //if (scope.enableZoom) {
-        //    var dx = event.touches[0].pageX - event.touches[1].pageX;
-        //    var dy = event.touches[0].pageY - event.touches[1].pageY;
-        //    var distance = Math.sqrt(dx * dx + dy * dy);
-        //    this.dollyStart.set(0, distance);
-        //}
-
-        //if (scope.enablePan) {
+    handleTouchStartDollyPan = (event: TouchEvent) => {
         var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
         var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
         this.panStart.set(x, y);
-        //}
     }
 
     handleTouchMoveRotate = (event: TouchEvent) => {
@@ -211,21 +197,9 @@ export class ObjectMover {
     }
 
     handleTouchMoveDollyPan = (event: TouchEvent) => {
-        //if (scope.enableZoom) {
-        //    var dx = event.touches[0].pageX - event.touches[1].pageX;
-        //    var dy = event.touches[0].pageY - event.touches[1].pageY;
-        //    var distance = Math.sqrt(dx * dx + dy * dy);
-        //    this.dollyEnd.set(0, distance);
-        //    this.dollyDelta.set(0, Math.pow(this.dollyEnd.y / this.dollyStart.y, this.zoomSpeed));
-        //    dollyIn(this.dollyDelta.y);
-        //    dollyStart.copy(this.dollyEnd);
-        //}
-
-        //if (scope.enablePan) {
         var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
         var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
-        this.handlePanCommon(x,y);
-        //}
+        this.handlePanCommon(x, y);
     }
 
     handleRotateCommon = (x: number, y: number) => {
