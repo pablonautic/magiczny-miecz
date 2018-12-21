@@ -70,11 +70,27 @@ export class ObjectMover {
         container.addEventListener('touchend', this.onTouchEnd, false);
     }
 
+    public updateRaycaster2 = (x: number, y: number) => {
+
+        var mouseX = (x / this.container.clientWidth) * 2 - 1;
+        var mouseY = -(y / this.container.clientHeight) * 2 + 1;
+
+        var vector = new THREE.Vector3(mouseX, mouseY, 1);
+        vector.unproject(this.game.camera);
+
+        this.game.raycaster.set(this.game.camera.position, vector.sub(this.game.camera.position).normalize());
+
+        //this.raycaster.setFromCamera({ x: event.clientX,  y: event.clientY }, this.camera);
+    }
+
     private onMouseDown = (event: MouseEvent) => {
         event.preventDefault();
 
         var x = event.offsetX;
         var y = event.offsetY;
+
+        console.log(event);
+        console.log(x + " " + y);
 
         switch (event.button) {
             case this.mouseButtons.LEFT:
@@ -147,6 +163,8 @@ export class ObjectMover {
     private onTouchStart = (event: TouchEvent) => {
         event.preventDefault();
 
+        console.log(event);
+
         this.state = this.touchToState(event);
         switch (this.state) {
             case STATE.TOUCH_ROTATE:
@@ -157,6 +175,13 @@ export class ObjectMover {
             case STATE.TOUCH_DOLLY_PAN:
                 var x = event.touches[0].pageX;
                 var y = event.touches[0].pageY;
+
+
+                x = event.touches[0].pageX - (event.touches[0].target as any).offsetLeft;
+                y = event.touches[0].pageY - (event.touches[0].target as any).offsetTop;
+
+                console.log(x + " " + y);
+
                 this.handlePanStart(x, y);
                 break;
             default:
@@ -183,6 +208,10 @@ export class ObjectMover {
             case STATE.TOUCH_DOLLY_PAN:
                 var x = event.touches[0].pageX;
                 var y = event.touches[0].pageY;
+
+                x = event.touches[0].pageX - (event.touches[0].target as any).offsetLeft;
+                y = event.touches[0].pageY - (event.touches[0].target as any).offsetTop;
+
                 this.handlePanMove(x, y);
                 break;
             default:
@@ -202,6 +231,10 @@ export class ObjectMover {
             case STATE.TOUCH_DOLLY_PAN:
                 var x = event.changedTouches[0].pageX;
                 var y = event.changedTouches[0].pageY;
+
+                //x = event.touches[0].pageX - (event.touches[0].target as any).offsetLeft;
+                //y = event.touches[0].pageY - (event.touches[0].target as any).offsetTop;
+
                 this.handlePanEnd(x, y);
                 break;
             default:
@@ -219,7 +252,7 @@ export class ObjectMover {
         //    this.panStartHandler(this.panStart);
         //}
 
-        this.game.updateRaycaster2(x, y);
+        this.updateRaycaster2(x, y);
 
         var intersects = this.game.raycaster.intersectObjects(this.game.interectionObjects, true);
 
@@ -262,7 +295,7 @@ export class ObjectMover {
         //    this.panMoveHandler(this.panDelta);
         //}
 
-        this.game.updateRaycaster2(x, y);
+        this.updateRaycaster2(x, y);
 
         if (this.game.draggedObject) {
 
