@@ -87,11 +87,9 @@ export class Game {
 
         this.container.appendChild(this.renderer.domElement);
 
-        this.container.addEventListener("mousedown", this.onDocumentMouseDown, false);
-        this.container.addEventListener("mousemove", this.onDocumentMouseMove, false);
-        this.container.addEventListener("mouseup", this.onDocumentMouseUp, false);
-
-        //this.objectMover = new ObjectMover(this.container);
+        //this.container.addEventListener("mousedown", this.onDocumentMouseDown, false);
+        //this.container.addEventListener("mousemove", this.onDocumentMouseMove, false);
+        //this.container.addEventListener("mouseup", this.onDocumentMouseUp, false);
 
         this.threeXWindowResize(this.renderer, this.camera);
 
@@ -162,6 +160,11 @@ export class Game {
         this.dice = new DiceD6({ backColor: "#1A6481", fontColor: "#FFFFFF", size: 5 });
         this.scene.add(this.dice.getObject());
         this.throwDice(5);
+
+        this.objectMover = new ObjectMover(this.container, this);
+        //this.objectMover.panStartHandler = this.onPanStart;
+        //this.objectMover.panMoveHandler = this.onPanMove;
+        //this.objectMover.panEndHandler = this.onPanEnd;
     }
 
     public init() {
@@ -273,6 +276,62 @@ export class Game {
 
         //this.raycaster.setFromCamera({ x: event.clientX,  y: event.clientY }, this.camera);
     }
+
+    public updateRaycaster2 = (x: number, y: number) => {
+
+        var mouseX = (x / this.width) * 2 - 1;
+        var mouseY = -(y / this.height) * 2 + 1;
+
+        var vector = new THREE.Vector3(mouseX, mouseY, 1);
+        vector.unproject(this.camera);
+
+        this.raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
+
+        //this.raycaster.setFromCamera({ x: event.clientX,  y: event.clientY }, this.camera);
+    }
+
+    //private onPanStart = (panStart: THREE.Vector2) => {
+    //    console.log("pan start" + panStart.x + " " + panStart.y);
+
+    //    this.updateRaycaster(event);
+
+    //    var intersects = this.raycaster.intersectObjects(this.interectionObjects, true);
+
+    //    if (intersects.length > 0) {
+
+    //        var hitMesh = intersects[0].object;
+    //        var hitActor = <IActor>hitMesh.userData["parent"];
+
+    //        var attr = hitMesh.userData[Card.attributeData];
+    //        if (attr) {
+    //            var card = hitActor as Card;
+    //            this.eventDispatcher.cardSetAttributeClientEventHandler.increment(card, attr, event.buttons === 2 ? -1 : 1);
+    //        }
+
+    //        if (hitActor.selectable) {
+    //            this.world.selectActor(hitActor);
+    //        } else {
+    //            this.world.clearSelectedActor();
+    //        }
+
+    //        if (hitActor.draggable) {
+    //            this.draggedObject = hitActor.object3D;
+    //            this.dragInitialPosition.copy(this.draggedObject.position);
+    //            this.dragInitialRotation.copy(this.draggedObject.rotation);
+    //            this.controls.enabled = false;
+    //        }
+    //    } else {
+    //        this.world.clearSelectedActor();
+    //    }
+    //}
+
+    //private onPanMove = (panDelta: THREE.Vector2) => {
+    //    console.log("pan move" + panDelta.x + " " + panDelta.y);
+    //}
+
+    //private onPanEnd = (panEnd: THREE.Vector2) => {
+    //    console.log("pan end" + panEnd.x + " " + panEnd.y);
+    //}
 
     private onDocumentMouseDown = (event: MouseEvent) => {
 
