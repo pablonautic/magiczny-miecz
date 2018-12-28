@@ -75,12 +75,7 @@ export class ObjectMover {
         var mouseX = (x / this.container.clientWidth) * 2 - 1;
         var mouseY = -(y / this.container.clientHeight) * 2 + 1;
 
-        var vector = new THREE.Vector3(mouseX, mouseY, 1);
-        vector.unproject(this.game.camera);
-
-        this.game.raycaster.set(this.game.camera.position, vector.sub(this.game.camera.position).normalize());
-
-        //this.game.raycaster.setFromCamera({ x: mouseX, y: mouseY }, this.game.camera);
+        this.game.raycaster.setFromCamera({ x: mouseX, y: mouseY }, this.game.camera);
     }
 
     private onMouseDown = (event: MouseEvent) => {
@@ -89,19 +84,19 @@ export class ObjectMover {
         var x = event.clientX - (event.target as any).offsetParent.offsetLeft;
         var y = event.clientY - (event.target as any).offsetParent.offsetTop;
 
-        console.log(event);
-        console.log(x + " " + y);
-
         switch (event.button) {
             case this.mouseButtons.LEFT:
                 this.state = STATE.PAN;
-                this.handlePanStart(x, y);
+                //this.handlePanStart(x, y);
                 break;
             case this.mouseButtons.RIGHT:
                 this.state = STATE.ROTATE;
-                this.handleRotateStart(x, y);
+                //this.handleRotateStart(x, y);
                 break;
         }
+
+        this.handlePanStart(x, y);
+
 
         if (this.state !== STATE.NONE) {
             this.container.addEventListener('mousemove', this.onMouseMove, false);
@@ -116,14 +111,16 @@ export class ObjectMover {
         var x = event.clientX - (event.target as any).offsetParent.offsetLeft;
         var y = event.clientY - (event.target as any).offsetParent.offsetTop;
 
-        switch (this.state) {
-            case STATE.ROTATE:
-                this.handleRotateMove(x, y);
-                break;
-            case STATE.PAN:
-                this.handlePanMove(x, y);
-                break;
-        }
+        //switch (this.state) {
+        //    case STATE.ROTATE:
+        //        this.handleRotateMove(x, y);
+        //        break;
+        //    case STATE.PAN:
+        //        this.handlePanMove(x, y);
+        //        break;
+        //}
+
+        this.handlePanMove(x, y);
     }
 
     private onMouseUp = (event: MouseEvent) => {
@@ -134,17 +131,19 @@ export class ObjectMover {
         var x = event.clientX - (event.target as any).offsetParent.offsetLeft;
         var y = event.clientY - (event.target as any).offsetParent.offsetTop;
 
-        switch (this.state) {
-            case STATE.ROTATE:
-                this.handleRotateEnd(x, y);
-                break;
-            case STATE.PAN:
-                this.handlePanEnd(x, y);
-                break;
-            default:
-                break;
-        }
+        //switch (this.state) {
+        //    case STATE.ROTATE:
+        //        this.handleRotateEnd(x, y);
+        //        break;
+        //    case STATE.PAN:
+        //        this.handlePanEnd(x, y);
+        //        break;
+        //    default:
+        //        break;
+        //}
         //scope.dispatchEvent(endEvent);
+
+        this.handlePanEnd(x, y);
 
         this.state = STATE.NONE;
     }
@@ -163,14 +162,17 @@ export class ObjectMover {
     private onTouchStart = (event: TouchEvent) => {
         event.preventDefault();
 
-        console.log(event);
+        //console.log(event);
 
         this.state = this.touchToState(event);
         switch (this.state) {
             case STATE.TOUCH_ROTATE:
                 var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
                 var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
-                this.handleRotateStart(x, y);
+                //this.handleRotateStart(x, y);
+
+                this.handlePanStart(x, y);
+
                 break;
             case STATE.TOUCH_DOLLY_PAN:
                 var x = event.touches[0].pageX;
@@ -180,13 +182,13 @@ export class ObjectMover {
                 x = event.touches[0].clientX - (event.target as any).offsetParent.offsetLeft;
                 y = event.touches[0].clientY - (event.target as any).offsetParent.offsetTop;
 
-                console.log(x + " " + y);
-
                 this.handlePanStart(x, y);
                 break;
             default:
                 break;
         }
+
+
 
         if (this.state !== STATE.NONE) {
             //scope.dispatchEvent(startEvent);
@@ -203,7 +205,10 @@ export class ObjectMover {
             case STATE.TOUCH_ROTATE:
                 var x = 0.5 * (event.touches[0].pageX + event.touches[1].pageX);
                 var y = 0.5 * (event.touches[0].pageY + event.touches[1].pageY);
-                this.handleRotateMove(x, y);
+                //this.handleRotateMove(x, y);
+
+                this.handlePanMove(x, y);
+
                 break;
             case STATE.TOUCH_DOLLY_PAN:
                 var x = event.touches[0].pageX;
@@ -218,6 +223,8 @@ export class ObjectMover {
                 this.state = STATE.NONE;
                 break;
         }
+
+
     }
 
     private onTouchEnd = (event: TouchEvent) => {
@@ -226,7 +233,11 @@ export class ObjectMover {
             case STATE.TOUCH_ROTATE:
                 var x = 0.5 * (event.changedTouches[0].pageX + event.touches[1].pageX);
                 var y = 0.5 * (event.changedTouches[0].pageY + event.touches[1].pageY);
-                this.handleRotateEnd(x, y);
+
+                //this.handleRotateEnd(x, y);
+
+                this.handlePanEnd(x, y);
+
                 break;
             case STATE.TOUCH_DOLLY_PAN:
                 var x = event.changedTouches[0].pageX;
@@ -263,8 +274,10 @@ export class ObjectMover {
 
             var attr = hitMesh.userData[Card.attributeData];
             if (attr) {
-                //var card = hitActor as Card;
-                //this.eventDispatcher.cardSetAttributeClientEventHandler.increment(card, attr, event.buttons === 2 ? -1 : 1);
+                var card = hitActor as Card;
+                var increment = this.state === STATE.PAN || this.state === STATE.TOUCH_DOLLY_PAN;
+                this.game.eventDispatcher.cardSetAttributeClientEventHandler.increment(card, attr, increment ? 1 : -1);
+                return;
             }
 
             if (hitActor.selectable) {
@@ -299,16 +312,16 @@ export class ObjectMover {
 
         if (this.game.draggedObject) {
 
-            //if (event.buttons === 2) {
-            //    this.draggedObject.rotateY((event.movementX) / 300);
+            if (!(this.state === STATE.PAN || this.state === STATE.TOUCH_DOLLY_PAN)) {
+                this.game.draggedObject.rotateY((2 * Math.PI * x / this.container.clientWidth / 10));
 
-            //} else {
-            var intersects = this.game.raycaster.intersectObject(this.game.plane);
-            var intersect = intersects[0].point;
-            this.game.draggedObject.position.x = intersect.x;
-            this.game.draggedObject.position.z = intersect.z;
+            } else {
+                var intersects = this.game.raycaster.intersectObject(this.game.plane);
+                var intersect = intersects[0].point;
+                this.game.draggedObject.position.x = intersect.x;
+                this.game.draggedObject.position.z = intersect.z;
 
-            //}
+            }
         }
     }
 
