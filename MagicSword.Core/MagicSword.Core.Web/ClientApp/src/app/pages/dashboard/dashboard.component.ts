@@ -35,7 +35,16 @@ export class DashboardComponent implements AfterViewInit, OnDestroy {
         setTimeout(() => {
             this.load();
         }, 500);
-        //this.timer = setInterval(async () => await this.load(), 5000);
+        this.timer = setInterval(async () => await this.load(), 5000);
+
+        this.loadDisqus();
+    }
+
+    private loadDisqus() {
+        var d = document, s = d.createElement('script');
+        s.src = 'https://magiczny-miecz.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', "" + new Date());
+        (d.head || d.body).appendChild(s);
     }
 
     ngOnDestroy(): void {
