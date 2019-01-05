@@ -28,8 +28,8 @@
                     <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
                         <button class="btn btn-secondary dropdown-item" (click)="shuffleStack()">Potasuj stos</button>
                         <button class="btn btn-secondary dropdown-item" (click)="putBackDisposed()">Dołóż karty odłożone</button>
-                        <button class="btn btn-secondary dropdown-item" (click)="viewCards(content)">Zobacz karty</button>
-                        <button class="btn btn-secondary dropdown-item" (click)="viewDisposedCards(content)">Zobacz karty odłożone</button>
+                        <button class="btn btn-secondary dropdown-item" (click)="viewCards(cardPickerModal)">Zobacz karty</button>
+                        <button class="btn btn-secondary dropdown-item" (click)="viewDisposedCards(cardPickerModal)">Zobacz karty odłożone</button>
                     </div>
                 </div>
             </div>
@@ -37,7 +37,7 @@
         <div [hidden]="!(selectedActor?.isCard)">
             <div class="btn-group-vertical" role="group" aria-label="Basic example">
                 <button class="btn btn-secondary" (click)="disposeCard()">Odłóż kartę</button>
-                <div ngbDropdown  class="card-dropdown">
+                <div ngbDropdown class="card-dropdown">
                     <button class="btn btn-secondary" id="dropdownBasic2" ngbDropdownToggle>...</button>
                     <div ngbDropdownMenu aria-labelledby="dropdownBasic2">
                         <button class="btn btn-secondary dropdown-item" (click)="toggleAttribute(attr)" *ngFor="let attr of attributes; index as i;">{{attrDdText(attr)}}</button>
@@ -48,7 +48,10 @@
     </div>
 
     <div class="menu-panel">
-        <button class="btn btn-secondary" (click)="diceThrow()">Rzuć kostką</button>
+        <div class="btn-group">
+            <button class="btn btn-secondary" (click)="diceThrow()">Rzuć kostką</button>
+            <button class="btn btn-secondary" (click)="showHelpModel(helpModal)">Pomoc</button>
+        </div>
     </div>
 
     <div #viewport class="viewport" style="align-items: stretch;">
@@ -57,7 +60,7 @@
 </div>
 
 
-<ng-template #content let-c="close" let-d="dismiss">
+<ng-template #cardPickerModal let-c="close" let-d="dismiss">
     <div class="modal-header">
         <h4 class="modal-title" id="modal-basic-title">Wybierz kartę</h4>
         <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
@@ -70,6 +73,31 @@
                 <img class="card-display" alt="{{card.name}}" src="{{card.contentUrl}}" />
             </a>
         </div>
+    </div>
+    <div class="modal-footer">
+    </div>
+</ng-template>
+
+<ng-template #helpModal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Pomoc</h4>
+        <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <h5>Plansza</h5>
+        <p>LPM / palec - obrót</p>
+        <p>PPM / dwa palce - przesuwanie</p>
+        <p>Scroll / dwa palce pinch - zoom</p>
+
+        <h5>Karty</h5>
+        <p>LPM / palec - przesuwanie</p>
+        <p>PPM / dwa palce - obrót</p>
+
+        <h5>Atrybuty</h5>
+        <p>LPM / palec - zwiększ wartość</p>
+        <p>PPM / dwa palce - zmniejsz wartość</p>
     </div>
     <div class="modal-footer">
     </div>

@@ -210,22 +210,28 @@ export class GameComponent implements AfterViewInit {
     async viewCards(content) {
         var stack = this.selectedActor as CardStack;
         var cards = await this.dispatcher.viewStackHandler.viewCards(stack);
-        this.showModal(content, cards);
+        this.showCardPickerModal(content, cards);
     }
 
     async viewDisposedCards(content) {
         var stack = this.selectedActor as CardStack;
         var cards = await this.dispatcher.viewStackHandler.viewDisposedCards(stack);
-        this.showModal(content, cards);
+        this.showCardPickerModal(content, cards);
     }
 
-    private showModal(content, cards: Card[]) {
+    private showCardPickerModal(content, cards: Card[]) {
         this.cardsToPick = cards;
         this.modalService.open(content, { ariaLabelledBy: "modal-basic-title" }).result.then(async (result) => {
             this.dispatcher.pickCardClientEventHandler.pickCard(result);
             this.clearCards();
         }, cancelReason => {
             this.clearCards();
+        });
+    }
+
+    showHelpModel(content) {
+        this.modalService.open(content, { ariaLabelledBy: "modal-basic-title" }).result.then(async (result) => {
+        }, cancelReason => {
         });
     }
 
