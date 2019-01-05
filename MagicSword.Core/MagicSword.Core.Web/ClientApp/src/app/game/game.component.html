@@ -35,14 +35,14 @@
             </div>
         </div>
         <div [hidden]="!(selectedActor?.isCard)">
-            <div class="btn-group" role="group" aria-label="Basic example">
-                <div ngbDropdown>
+            <div class="btn-group-vertical" role="group" aria-label="Basic example">
+                <button class="btn btn-secondary" (click)="disposeCard()">Odłóż kartę</button>
+                <div ngbDropdown  class="card-dropdown">
                     <button class="btn btn-secondary" id="dropdownBasic2" ngbDropdownToggle>...</button>
                     <div ngbDropdownMenu aria-labelledby="dropdownBasic2">
                         <button class="btn btn-secondary dropdown-item" (click)="toggleAttribute(attr)" *ngFor="let attr of attributes; index as i;">{{attrDdText(attr)}}</button>
                     </div>
                 </div>
-                <button class="btn btn-secondary" (click)="disposeCard()">Odłóż kartę</button>
             </div>
         </div>
     </div>
