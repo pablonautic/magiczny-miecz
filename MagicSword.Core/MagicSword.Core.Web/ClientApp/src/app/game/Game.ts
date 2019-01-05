@@ -36,10 +36,6 @@ export class Game {
     //stats: any;
 
     interectionObjects: THREE.Object3D[] = [];
-    draggedObject: THREE.Object3D;
-
-    dragInitialPosition = new THREE.Vector3();
-    dragInitialRotation = new THREE.Euler();
 
     id: string;
 
@@ -86,10 +82,6 @@ export class Game {
         this.renderer.setClearColor(this.scene.fog.color);
 
         this.container.appendChild(this.renderer.domElement);
-
-        //this.container.addEventListener("mousedown", this.onDocumentMouseDown, false);
-        //this.container.addEventListener("mousemove", this.onDocumentMouseMove, false);
-        //this.container.addEventListener("mouseup", this.onDocumentMouseUp, false);
 
         this.threeXWindowResize(this.renderer, this.camera);
 
@@ -162,9 +154,6 @@ export class Game {
         this.throwDice(5);
 
         this.objectMover = new ObjectMover(this.container, this);
-        //this.objectMover.panStartHandler = this.onPanStart;
-        //this.objectMover.panMoveHandler = this.onPanMove;
-        //this.objectMover.panEndHandler = this.onPanEnd;
     }
 
     public init() {
@@ -249,170 +238,17 @@ export class Game {
     }
 
     removeActor(actor: IActor) {
-
         var object3D = actor.object3D;
         this.interectionObjects = Collections.remove(this.interectionObjects, object3D);
+
         //just in case
-        if (this.draggedObject === actor.object3D) {
-            this.draggedObject = null;
+        if (this.objectMover.draggedObject === actor.object3D) {
+            this.objectMover.draggedObject = null;
         }
 
         this.scene.remove(object3D);
-
         this.actors = Collections.remove(this.actors, object3D);
     }
-
-    //BEWARE: the functions below cannot be converted to member functions, since the "this" context is different when using "old-style" binding !
-
-    private updateRaycaster = (event: MouseEvent) => {
-
-        var mouseX = (event.offsetX / this.width) * 2 - 1;
-        var mouseY = -(event.offsetY / this.height) * 2 + 1;
-
-        var vector = new THREE.Vector3(mouseX, mouseY, 1);
-        vector.unproject(this.camera);
-
-        this.raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
-
-        //this.raycaster.setFromCamera({ x: event.clientX,  y: event.clientY }, this.camera);
-    }
-
-    public updateRaycaster2 = (x: number, y: number) => {
-
-        var mouseX = (x / this.width) * 2 - 1;
-        var mouseY = -(y / this.height) * 2 + 1;
-
-        var vector = new THREE.Vector3(mouseX, mouseY, 1);
-        vector.unproject(this.camera);
-
-        this.raycaster.set(this.camera.position, vector.sub(this.camera.position).normalize());
-
-        //this.raycaster.setFromCamera({ x: event.clientX,  y: event.clientY }, this.camera);
-    }
-
-    //private onPanStart = (panStart: THREE.Vector2) => {
-    //    console.log("pan start" + panStart.x + " " + panStart.y);
-
-    //    this.updateRaycaster(event);
-
-    //    var intersects = this.raycaster.intersectObjects(this.interectionObjects, true);
-
-    //    if (intersects.length > 0) {
-
-    //        var hitMesh = intersects[0].object;
-    //        var hitActor = <IActor>hitMesh.userData["parent"];
-
-    //        var attr = hitMesh.userData[Card.attributeData];
-    //        if (attr) {
-    //            var card = hitActor as Card;
-    //            this.eventDispatcher.cardSetAttributeClientEventHandler.increment(card, attr, event.buttons === 2 ? -1 : 1);
-    //        }
-
-    //        if (hitActor.selectable) {
-    //            this.world.selectActor(hitActor);
-    //        } else {
-    //            this.world.clearSelectedActor();
-    //        }
-
-    //        if (hitActor.draggable) {
-    //            this.draggedObject = hitActor.object3D;
-    //            this.dragInitialPosition.copy(this.draggedObject.position);
-    //            this.dragInitialRotation.copy(this.draggedObject.rotation);
-    //            this.controls.enabled = false;
-    //        }
-    //    } else {
-    //        this.world.clearSelectedActor();
-    //    }
-    //}
-
-    //private onPanMove = (panDelta: THREE.Vector2) => {
-    //    console.log("pan move" + panDelta.x + " " + panDelta.y);
-    //}
-
-    //private onPanEnd = (panEnd: THREE.Vector2) => {
-    //    console.log("pan end" + panEnd.x + " " + panEnd.y);
-    //}
-
-    private onDocumentMouseDown = (event: MouseEvent) => {
-
-        this.updateRaycaster(event);
-
-        var intersects = this.raycaster.intersectObjects(this.interectionObjects, true);
-
-        if (intersects.length > 0) {
-
-            var hitMesh = intersects[0].object;
-            var hitActor = <IActor>hitMesh.userData["parent"];
-
-            var attr = hitMesh.userData[Card.attributeData];
-            if (attr) {
-                var card = hitActor as Card;
-                this.eventDispatcher.cardSetAttributeClientEventHandler.increment(card, attr, event.buttons === 2 ? -1 : 1);
-            }
-
-            if (hitActor.selectable) {
-                this.world.selectActor(hitActor);
-            } else {
-                this.world.clearSelectedActor();
-            }
-
-            if (hitActor.draggable) {
-                this.draggedObject = hitActor.object3D;
-                this.dragInitialPosition.copy(this.draggedObject.position);
-                this.dragInitialRotation.copy(this.draggedObject.rotation);
-                this.controls.enabled = false;
-            }
-        } else {
-            this.world.clearSelectedActor();
-        }
-
-    }
-
-    private onDocumentMouseMove = (event: MouseEvent) => {
-        event.preventDefault();
-
-        this.updateRaycaster(event);
-
-        if (this.draggedObject) {
-
-            if (event.buttons === 2) {
-                this.draggedObject.rotateY((event.movementX) / 300);
-
-            } else {
-                var intersects = this.raycaster.intersectObject(this.plane);
-                var intersect = intersects[0].point;
-                this.draggedObject.position.x = intersect.x;
-                this.draggedObject.position.z = intersect.z;
-
-            }
-        }
-    }
-
-    // ReSharper disable once UnusedParameter
-    private onDocumentMouseUp = (event: MouseEvent) => {
-
-        if (!this.draggedObject) {
-            return;
-        }
-
-        var finalPosition = this.draggedObject.position;
-
-        if (finalPosition.distanceTo(this.dragInitialPosition) > 0.001) {
-            var actor = this.draggedObject.userData["parent"];
-            this.eventDispatcher.actorMoveHandler.moveActor(actor);
-        }
-
-        var finalRotation = this.draggedObject.rotation;
-        if (finalRotation.toVector3().distanceTo(this.dragInitialRotation.toVector3()) > 0.001) {
-            var actor2 = this.draggedObject.userData["parent"];
-            this.eventDispatcher.actorRotateHandler.moveActor(actor2);
-        }
-
-        this.draggedObject = null;
-        this.controls.enabled = true;
-    }
-
-    // end of BEWARE
 
     new() {
         this.resetCamera();

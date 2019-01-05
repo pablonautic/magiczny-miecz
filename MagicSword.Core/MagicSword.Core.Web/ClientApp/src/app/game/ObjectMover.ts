@@ -17,17 +17,13 @@ export class ObjectMover {
 
     private state = STATE.NONE;
 
-    private rotateStart = new THREE.Vector2();
-    private rotateEnd = new THREE.Vector2();
-    private rotateDelta = new THREE.Vector2();
-
     private panStart = new THREE.Vector2();
     private panEnd = new THREE.Vector2();
     private panDelta = new THREE.Vector2();
 
-    private rotateSpeed = 1.0;
-    private panSpeed = 1.0;
-
+    draggedObject: THREE.Object3D;
+    dragInitialPosition = new THREE.Vector3();
+    dragInitialRotation = new THREE.Euler();
 
     constructor(private container: HTMLElement, private game: Game) {
 
@@ -161,9 +157,9 @@ export class ObjectMover {
             }
 
             if (hitActor.draggable) {
-                this.game.draggedObject = hitActor.object3D;
-                this.game.dragInitialPosition.copy(this.game.draggedObject.position);
-                this.game.dragInitialRotation.copy(this.game.draggedObject.rotation);
+                this.draggedObject = hitActor.object3D;
+                this.dragInitialPosition.copy(this.draggedObject.position);
+                this.dragInitialRotation.copy(this.draggedObject.rotation);
                 this.game.controls.enabled = false;
             }
         } else {
@@ -178,16 +174,16 @@ export class ObjectMover {
 
         this.updateRaycaster2(x, y);
 
-        if (this.game.draggedObject) {
+        if (this.draggedObject) {
 
             if (!(this.state === STATE.PAN || this.state === STATE.TOUCH_DOLLY_PAN)) {
-                this.game.draggedObject.rotateY(this.panDelta.x / 300);
+                this.draggedObject.rotateY(this.panDelta.x / 300);
 
             } else {
                 var intersects = this.game.raycaster.intersectObject(this.game.plane);
                 var intersect = intersects[0].point;
-                this.game.draggedObject.position.x = intersect.x;
-                this.game.draggedObject.position.z = intersect.z;
+                this.draggedObject.position.x = intersect.x;
+                this.draggedObject.position.z = intersect.z;
 
             }
         }
@@ -197,24 +193,24 @@ export class ObjectMover {
         this.panEnd.set(x, y);
 
 
-        if (!this.game.draggedObject) {
+        if (!this.draggedObject) {
             return;
         }
 
-        var finalPosition = this.game.draggedObject.position;
+        var finalPosition = this.draggedObject.position;
 
-        if (finalPosition.distanceTo(this.game.dragInitialPosition) > 0.001) {
-            var actor = this.game.draggedObject.userData["parent"];
+        if (finalPosition.distanceTo(this.dragInitialPosition) > 0.001) {
+            var actor = this.draggedObject.userData["parent"];
             this.game.eventDispatcher.actorMoveHandler.moveActor(actor);
         }
 
-        var finalRotation = this.game.draggedObject.rotation;
-        if (finalRotation.toVector3().distanceTo(this.game.dragInitialRotation.toVector3()) > 0.001) {
-            var actor2 = this.game.draggedObject.userData["parent"];
+        var finalRotation = this.draggedObject.rotation;
+        if (finalRotation.toVector3().distanceTo(this.dragInitialRotation.toVector3()) > 0.001) {
+            var actor2 = this.draggedObject.userData["parent"];
             this.game.eventDispatcher.actorRotateHandler.moveActor(actor2);
         }
 
-        this.game.draggedObject = null;
+        this.draggedObject = null;
         this.game.controls.enabled = true;
 
     }
