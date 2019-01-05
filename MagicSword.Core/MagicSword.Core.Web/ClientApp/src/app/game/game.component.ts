@@ -180,7 +180,7 @@ export class GameComponent implements AfterViewInit {
         this.chatMessage = "";
     }
 
-    drawCard(uncover: boolean = false) {
+    drawCard(uncover: boolean = true) {
         this.dispatcher.drawCardHandler.drawCard(uncover);
     }
 

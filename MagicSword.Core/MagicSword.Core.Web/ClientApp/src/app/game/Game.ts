@@ -91,7 +91,6 @@ export class Game {
         const source = fromEvent(this.controls, "change");
         const result = source.pipe(debounceTime(1000));
         result.subscribe(_ => {
-            console.log(this.eventDispatcher.cameraChangeEventHandler);
             this.eventDispatcher.cameraChangeEventHandler.cameraChanged(this.camera);
         });
 
