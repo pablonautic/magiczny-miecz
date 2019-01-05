@@ -36,7 +36,13 @@ export class GameComponent implements AfterViewInit {
     dispatcher: ClientEventDispatcher;
     clientGameService: ClientGameService;
 
+    gameMode: string = "local";
+
     chatMessage = "";
+
+    get isOnlineGame(): boolean {
+        return this.gameMode === "online";
+    }
 
     get selectedActor(): IActor {
         return this.game ? this.game.world.selectedActor : null;
@@ -68,14 +74,13 @@ export class GameComponent implements AfterViewInit {
 
         await this.resourceManager.load();
 
-        var mode = "local";
         if (location.href.indexOf("/online/") > 0) {
-            mode = "online";
+            this.gameMode = "online";
         }
 
         this.route.paramMap.subscribe(d => {
             var gameId = d.get("gameId");
-            this.startGame(gameId, mode);
+            this.startGame(gameId, this.gameMode);
         });
     }
 

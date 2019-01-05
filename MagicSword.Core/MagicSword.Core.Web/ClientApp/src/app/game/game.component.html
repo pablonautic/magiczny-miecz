@@ -7,7 +7,7 @@
                 <li class="list-group-item list-group-item-info" *ngFor="let message of messages; index as i;">{{message.text}}</li>
             </ul>
         </div>
-        <div class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
+        <div [hidden]="!(isOnlineGame)" class="btn-toolbar mb-3" role="toolbar" aria-label="Toolbar with button groups">
             <div class="input-group">
                 <input [(ngModel)]="chatMessage" (keydown.enter)="sendMessage()" type="text" class="form-control" placeholder="Wiadomość" maxlength="400"
                        aria-label="Input group example" aria-describedby="btnGroupAddon" autofocus>
@@ -21,8 +21,9 @@
     <div class="controls-panel" [hidden]="!selectedActor">
         <img class="card-display" src="{{selectedActor?.faceUrl}}" alt="{{selectedActor?.name}}" />
         <div [hidden]="!(selectedActor?.isCardStack)">
-            <div class="btn-group" role="group" aria-label="Basic example">
-                <div ngbDropdown>
+            <div class="btn-group-vertical" role="group" aria-label="Basic example">
+                <button class="btn btn-secondary" (click)="drawCard()">Wyciągnij kartę</button>
+                <div ngbDropdown class="card-dropdown">
                     <button class="btn btn-secondary" id="dropdownBasic1" ngbDropdownToggle>...</button>
                     <div ngbDropdownMenu aria-labelledby="dropdownBasic1">
                         <button class="btn btn-secondary dropdown-item" (click)="shuffleStack()">Potasuj stos</button>
@@ -31,7 +32,6 @@
                         <button class="btn btn-secondary dropdown-item" (click)="viewDisposedCards(content)">Zobacz karty odłożone</button>
                     </div>
                 </div>
-                <button class="btn btn-secondary" (click)="drawCard()">Wyciągnij kartę</button>
             </div>
         </div>
         <div [hidden]="!(selectedActor?.isCard)">
