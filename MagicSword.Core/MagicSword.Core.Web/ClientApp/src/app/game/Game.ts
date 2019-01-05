@@ -32,7 +32,6 @@ export class Game {
     clock: THREE.Clock;
     plane: THREE.Mesh;
     offset: THREE.Vector3;
-    raycaster: THREE.Raycaster;
     //stats: any;
 
     interectionObjects: THREE.Object3D[] = [];
@@ -66,7 +65,6 @@ export class Game {
         }
 
         this.offset = new THREE.Vector3();
-        this.raycaster = new THREE.Raycaster();
 
         this.scene = new THREE.Scene();
         this.scene.fog = new THREE.FogExp2(0xcce0ff, 0.0003);

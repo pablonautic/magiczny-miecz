@@ -13,7 +13,7 @@ export enum STATE {
 
 export class ObjectMover {
 
-    private mouseButtons = { LEFT: THREE.MOUSE.LEFT, MIDDLE: THREE.MOUSE.MIDDLE, RIGHT: THREE.MOUSE.RIGHT };
+    draggedObject: THREE.Object3D;
 
     private state = STATE.NONE;
 
@@ -21,9 +21,10 @@ export class ObjectMover {
     private panEnd = new THREE.Vector2();
     private panDelta = new THREE.Vector2();
 
-    draggedObject: THREE.Object3D;
-    dragInitialPosition = new THREE.Vector3();
-    dragInitialRotation = new THREE.Euler();
+    private raycaster = new THREE.Raycaster();
+
+    private dragInitialPosition = new THREE.Vector3();
+    private dragInitialRotation = new THREE.Euler();
 
     constructor(private container: HTMLElement, private game: Game) {
 
@@ -34,22 +35,22 @@ export class ObjectMover {
         container.addEventListener('touchend', this.onTouchEnd, false);
     }
 
-    public updateRaycaster2 = (x: number, y: number) => {
+    public updateRaycaster = (x: number, y: number) => {
 
         var mouseX = (x / this.container.clientWidth) * 2 - 1;
         var mouseY = -(y / this.container.clientHeight) * 2 + 1;
 
-        this.game.raycaster.setFromCamera({ x: mouseX, y: mouseY }, this.game.camera);
+        this.raycaster.setFromCamera({ x: mouseX, y: mouseY }, this.game.camera);
     }
 
     private onMouseDown = (event: MouseEvent) => {
         event.preventDefault();
 
         switch (event.button) {
-            case this.mouseButtons.LEFT:
+            case THREE.MOUSE.LEFT:
                 this.state = STATE.PAN;
                 break;
-            case this.mouseButtons.RIGHT:
+            case THREE.MOUSE.RIGHT:
                 this.state = STATE.ROTATE;
                 break;
         }
@@ -133,9 +134,9 @@ export class ObjectMover {
     handlePanStart(x: number, y: number) {
         this.panStart.set(x, y);
 
-        this.updateRaycaster2(x, y);
+        this.updateRaycaster(x, y);
 
-        var intersects = this.game.raycaster.intersectObjects(this.game.interectionObjects, true);
+        var intersects = this.raycaster.intersectObjects(this.game.interectionObjects, true);
 
         if (intersects.length > 0) {
 
@@ -172,7 +173,7 @@ export class ObjectMover {
         this.panDelta.subVectors(this.panEnd, this.panStart);
         this.panStart.copy(this.panEnd);
 
-        this.updateRaycaster2(x, y);
+        this.updateRaycaster(x, y);
 
         if (this.draggedObject) {
 
@@ -180,7 +181,7 @@ export class ObjectMover {
                 this.draggedObject.rotateY(this.panDelta.x / 300);
 
             } else {
-                var intersects = this.game.raycaster.intersectObject(this.game.plane);
+                var intersects = this.raycaster.intersectObject(this.game.plane);
                 var intersect = intersects[0].point;
                 this.draggedObject.position.x = intersect.x;
                 this.draggedObject.position.z = intersect.z;
